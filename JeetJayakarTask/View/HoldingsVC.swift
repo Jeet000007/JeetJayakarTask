@@ -138,7 +138,7 @@ extension HoldingsVC{
         parentStackView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor, constant: -8).isActive = true
         parentStackView.topAnchor.constraint(equalTo: parentView.topAnchor, constant: 16).isActive = true
         
-        //
+        // Current Portfolio Value View
         currentValueStackView.axis = .horizontal
         currentValueStackView.spacing = 16.0
         currentValueStackView.distribution = .equalSpacing
@@ -155,7 +155,7 @@ extension HoldingsVC{
         currentValueDataLabel.textAlignment = .right
         currentValueStackView.addArrangedSubview(currentValueDataLabel)
         
-        //
+        // Total Investment Value View
         totalInvestementStackView.axis = .horizontal
         totalInvestementStackView.spacing = 16.0
         totalInvestementStackView.distribution = .equalSpacing
@@ -172,8 +172,8 @@ extension HoldingsVC{
         totalInvestementDataLabel.textAlignment = .right
         totalInvestementStackView.addArrangedSubview(totalInvestementDataLabel)
         
-        //
         
+        // Today Profit & Loss View
         todayProfitLossStackView.axis = .horizontal
         todayProfitLossStackView.spacing = 16.0
         todayProfitLossStackView.distribution = .equalSpacing
@@ -190,12 +190,11 @@ extension HoldingsVC{
         todayProfitLossDataLabel.textAlignment = .right
         todayProfitLossStackView.addArrangedSubview(todayProfitLossDataLabel)
         
-        //
         summarySeperatorView.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
         summarySeperatorView.backgroundColor = UIColor.darkGray
         parentStackView.addArrangedSubview(summarySeperatorView)
-        //
         
+        // Overall Profit & Loss View
         let overallProfitLossStackView = UIStackView()
         overallProfitLossStackView.axis = .horizontal
         overallProfitLossStackView.spacing = 16.0
@@ -320,9 +319,8 @@ extension HoldingsVC{
     }
 }
 
-//MARK: VIEW MODEL PROTOCOL
-extension HoldingsVC: HoldingsVMProtocol{
-    
+//MARK: VIEW MODEL COMMUNICATION
+extension HoldingsVC{
     func performDataFetch()  {
         AppHelper.addLoader(controller: self)
         holdingsVM?.performHoldingDataFetch()
@@ -331,6 +329,10 @@ extension HoldingsVC: HoldingsVMProtocol{
     func configureViewModel()  {
         holdingsVM = HoldingsViewModel(delegate: self)
     }
+}
+
+//MARK: VIEW MODEL PROTOCOL METHODS
+extension HoldingsVC: HoldingsVMProtocol{
     
     func holdingDataFetchSuccess() {
         AppHelper.removeLoader()
@@ -345,7 +347,9 @@ extension HoldingsVC: HoldingsVMProtocol{
     
     func holdingDataFetchError(error: String) {
         AppHelper.removeLoader()
-        AppHelper.showDataAlert(title: error, message: "", controller: self)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            AppHelper.showDataAlert(title: error, message: "", controller: self)
+        }
         reloadTableData()
     }
 }

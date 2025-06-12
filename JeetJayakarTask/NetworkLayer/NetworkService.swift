@@ -13,7 +13,9 @@ class NetworkService {
     
     static let shared = NetworkService()
     
-    private init() {}
+    private init() {
+        NetworkService.createApiDataSuite()
+    }
     
     func fetchData(from urlString: String, completion: @escaping (Result<Data, NetworkError>) -> Void) {
         
@@ -47,5 +49,25 @@ class NetworkService {
             completion(.success(data))
             
         }.resume()
+    }
+}
+
+extension NetworkService{
+    
+    static func saveOfflineData(apiData: String, apiKey: String)  {
+        
+        UserDefaults.init(suiteName: UserDefaultsKey.apiDataStorage)?.setValue(apiData, forKey: apiKey)
+    }
+    
+    static func getOfflineData(apiKey: String) -> String? {
+        if  let offlineApiData = UserDefaults.init(suiteName: UserDefaultsKey.apiDataStorage)?.value(forKey: apiKey) as? String{
+            return offlineApiData
+        }
+        return nil
+    }
+    
+    
+   static func createApiDataSuite()  {
+        UserDefaults.standard.addSuite(named: UserDefaultsKey.apiDataStorage)
     }
 }

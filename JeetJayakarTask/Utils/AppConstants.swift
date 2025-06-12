@@ -13,3 +13,7 @@ struct ApiEndpoints {
 struct ApiError {
     static let somethingWentWrong = "Something Went Wrong"
 }
+
+struct UserDefaultsKey {
+    static let apiDataStorage = "API_DATA_STORAGE"
+}

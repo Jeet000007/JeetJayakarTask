@@ -33,15 +33,43 @@ extension HoldingsViewModel{
                 do {
                     self?.holdingsData = try JSONDecoder().decode(Holding.self, from: data)
                     self?.delegate?.holdingDataFetchSuccess()
+                    self?.saveHoldingsDataOffline(data: data)
                 }catch{
-                    print("Decoding error: \(error)")
+//                    print("Decoding error: \(error)")
                     self?.delegate?.holdingDataFetchError(error: ApiError.somethingWentWrong)
                 }
             case .failure(let error):
-                print("Network error: \(error)")
-                self?.delegate?.holdingDataFetchError(error: error.localizedDescription)
+                guard self?.checkForHoldingsOfflineData() ?? false else {
+                    self?.delegate?.holdingDataFetchError(error: error.localizedDescription)
+                    return
+                }
+                self?.delegate?.holdingDataFetchSuccess()
             }
         }
+    }
+    
+    
+}
+
+//MARK: OFFLINE DATA STORAGE METHODS
+extension HoldingsViewModel{
+    
+    func saveHoldingsDataOffline(data: Data)  {
+        guard let offlineData = String(data: data, encoding: .utf8) else { return }
+        NetworkService.saveOfflineData(apiData: offlineData, apiKey: ApiEndpoints.holdingsUrl)
+    }
+    
+    func checkForHoldingsOfflineData() -> Bool {
+        guard let holdingsOfflineDataString = NetworkService.getOfflineData(apiKey: ApiEndpoints.holdingsUrl), let holdingsOfflineData = holdingsOfflineDataString.data(using: .utf8)  else { return false }
+        do {
+            self.holdingsData = try JSONDecoder().decode(Holding.self, from: holdingsOfflineData)
+            return true
+        }catch{
+//            print("Decoding error: \(error)")
+            self.delegate?.holdingDataFetchError(error: ApiError.somethingWentWrong)
+        }
+        
+        return false
     }
 }
 
